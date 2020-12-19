@@ -14,8 +14,9 @@ library(lubridate)
 
 
 library(readr)
-bilan_electrique_transpose <- read_delim("C:/Users/Camille/Documents/Projet_shiny/bilan-electrique-transpose.csv", 
-                                         ";", escape_double = FALSE, trim_ws = TRUE)
+bilan_electrique_transpose <- readRDS('data/conso_data.rds')
+# bilan_electrique_transpose <- read_delim("C:/Users/Camille/Documents/Projet_shiny/bilan-electrique-transpose.csv", 
+#                                          ";", escape_double = FALSE, trim_ws = TRUE)
 
 # renommer les variables
 colnames(bilan_electrique_transpose) <- c("jour","categorie_client","puissance")
