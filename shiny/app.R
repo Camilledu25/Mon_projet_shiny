@@ -225,7 +225,7 @@ ui <- navbarPage(
                      selectInput("obs1",
                                  "date finale:",
                                  choices = sort(unique(bilan_date$jour)),
-                                 selected = as.Date("2020-03-25",timeFormat="%Y-%m-%d"))
+                                 selected = as.Date("2020-08-17",timeFormat="%Y-%m-%d"))
                      # sliderInput("obs1",
                      #             "date finale:",
                      #             min = as.Date("2020-03-17","%Y-%m-%d"),
