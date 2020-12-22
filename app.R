@@ -236,6 +236,25 @@ join2<-mutate(join2,ecart_residentiels=abs(pred_puiss_residentiels-puiss_residen
 finale<-join2
 finale<-finale%>%filter(jour>=as.Date("2020-03-17"))
 
+finale2<-finale%>%mutate(conss_pme.pmi=puiss_pme.pmi*24/1000000)%>%
+    mutate(conss_professionnels=puiss_professionnels*24/1000000)%>%
+    mutate(conss_entreprises=puiss_entreprises*24/1000000)%>%
+    mutate(conss_residentiels=puiss_residentiels*24/1000000)%>%
+    mutate(pred_conss_pme.pmi=pred_puiss_pme.pmi*24/1000000)%>%
+    mutate(pred_conss_professionnels=pred_puiss_professionnels*24/1000000)%>%
+    mutate(pred_conss_residentiels=pred_puiss_residentiels*24/1000000)%>%
+    mutate(pred_conss_entreprises=pred_puiss_entreprises*24/1000000)
+
+finale3<-finale2%>%select(-puiss_pme.pmi,-puiss_professionnels,-puiss_entreprises,-puiss_residentiels,-pred_puiss_pme.pmi,-pred_puiss_professionnels,-pred_puiss_residentiels,-pred_puiss_entreprises)
+finale4<-finale3%>%select(-ecart_pme.pmi,-ecart_professionnels,-ecart_entreprises,-ecart_residentiels)
+
+join3<-mutate(finale4,ecart_pme.pmi=abs(pred_conss_pme.pmi-conss_pme.pmi))
+join3<-mutate(join3,ecart_professionnels=abs(pred_conss_professionnels-conss_professionnels))
+join3<-mutate(join3,ecart_entreprises=abs(pred_conss_entreprises-conss_entreprises))
+join3<-mutate(join3,ecart_residentiels=abs(pred_conss_residentiels-conss_residentiels))
+
+finale<-join3
+
 # ui ----------------------------------------------------------------------
 
 ui <- navbarPage(
@@ -305,8 +324,8 @@ server <- function(input, output) {
     
     filtre <- reactive({
         finale %>% 
-            select(jour,paste0('puiss_',
-                               input$segment),paste0('pred_puiss_',
+            select(jour,paste0('conss_',
+                               input$segment),paste0('pred_conss_',
                                                      input$segment),paste0('ecart_',
                                                                            input$segment))%>%
             filter(jour >= input$obs)%>%
@@ -318,7 +337,7 @@ server <- function(input, output) {
         recupere_donnee<- finale %>% 
             filter(jour >= input$obs)%>%
             filter(jour <= input$obs1)%>%
-            select(paste0('puiss_',
+            select(paste0('conss_',
                           input$segment))
         
         somme <- sum(recupere_donnee)
@@ -333,7 +352,7 @@ server <- function(input, output) {
         recupere_donnee1<- finale %>% 
             filter(jour >= input$obs)%>%
             filter(jour <= input$obs1)%>%
-            select(paste0('pred_puiss_',
+            select(paste0('pred_conss_',
                           input$segment))
         
         somme1 <- sum(recupere_donnee1)
@@ -362,7 +381,7 @@ server <- function(input, output) {
         recupere_donnee<- finale %>% 
             filter(jour >= input$obs)%>%
             filter(jour <= input$obs1)%>%
-            select(paste0('puiss_',
+            select(paste0('conss_',
                           input$segment))
         
         somme <- sum(recupere_donnee)
@@ -386,7 +405,7 @@ server <- function(input, output) {
     output$courbe_realise_mod <- renderPlotly({
         
         df1 <- filtre() %>%
-            select(jour, contains('pred_puiss_'),contains('puiss_'))%>%
+            select(jour, contains('pred_conss_'),contains('conss_'))%>%
             tidyr::pivot_longer(-c("jour"))
         
         
