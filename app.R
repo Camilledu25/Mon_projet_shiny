@@ -410,8 +410,9 @@ server <- function(input, output) {
     })
     
     output$ma_table2 <- renderTable({
-        out <-  filtre()#%>%
-        #     filter(jour > as.Date ("2020-03-15"))
+        out <-  filtre()
+        out$jour<-as.character(out$jour)
+        
         print(out)
         out
     } )
