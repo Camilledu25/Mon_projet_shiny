@@ -238,8 +238,6 @@ finale<-finale%>%filter(jour>=as.Date("2020-03-17"))
 
 # ui ----------------------------------------------------------------------
 
-
-# Define UI for application that draws a histogram
 ui <- navbarPage(
     'Impact du covid sur les consommations électriques',
     
@@ -274,11 +272,8 @@ ui <- navbarPage(
                  
                  
                  mainPanel(
-                     ##affichage du nom du departement
                      h3(textOutput('nom_segment')),
                      
-                     
-                     ####TODO: remplacer par la table par un datatable 
                      plotlyOutput('courbe_realise_mod'),
                      valueBoxOutput("sommered"),
                      valueBoxOutput("sommepred"),
@@ -301,7 +296,6 @@ ui <- navbarPage(
 # Server ------------------------------------------------------------------
 
 
-# Define server logic required to draw a histogram
 server <- function(input, output) {
     
     output$nom_segment <- renderText({
