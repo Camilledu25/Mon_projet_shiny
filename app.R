@@ -236,14 +236,14 @@ join2<-mutate(join2,ecart_residentiels=abs(pred_puiss_residentiels-puiss_residen
 finale<-join2
 finale<-finale%>%filter(jour>=as.Date("2020-03-17"))
 
-finale2<-finale%>%mutate(conss_pme.pmi=puiss_pme.pmi*24/1000000)%>%
-    mutate(conss_professionnels=puiss_professionnels*24/1000000)%>%
-    mutate(conss_entreprises=puiss_entreprises*24/1000000)%>%
-    mutate(conss_residentiels=puiss_residentiels*24/1000000)%>%
-    mutate(pred_conss_pme.pmi=pred_puiss_pme.pmi*24/1000000)%>%
-    mutate(pred_conss_professionnels=pred_puiss_professionnels*24/1000000)%>%
-    mutate(pred_conss_residentiels=pred_puiss_residentiels*24/1000000)%>%
-    mutate(pred_conss_entreprises=pred_puiss_entreprises*24/1000000)
+finale2<-finale%>%mutate(conss_pme.pmi=puiss_pme.pmi*24/1000000000)%>%
+    mutate(conss_professionnels=puiss_professionnels*24/1000000000)%>%
+    mutate(conss_entreprises=puiss_entreprises*24/1000000000)%>%
+    mutate(conss_residentiels=puiss_residentiels*24/1000000000)%>%
+    mutate(pred_conss_pme.pmi=pred_puiss_pme.pmi*24/1000000000)%>%
+    mutate(pred_conss_professionnels=pred_puiss_professionnels*24/1000000000)%>%
+    mutate(pred_conss_residentiels=pred_puiss_residentiels*24/1000000000)%>%
+    mutate(pred_conss_entreprises=pred_puiss_entreprises*24/1000000000)
 
 finale3<-finale2%>%select(-puiss_pme.pmi,-puiss_professionnels,-puiss_entreprises,-puiss_residentiels,-pred_puiss_pme.pmi,-pred_puiss_professionnels,-pred_puiss_residentiels,-pred_puiss_entreprises)
 finale4<-finale3%>%select(-ecart_pme.pmi,-ecart_professionnels,-ecart_entreprises,-ecart_residentiels)
@@ -260,7 +260,7 @@ finale<-join3
 ui <- navbarPage(
     'Impact du covid sur les consommations électriques',
     
-    tabPanel('Etude',
+    tabPanel('Etude des données Gwh',
              id = 'departements',
              
              
@@ -272,34 +272,35 @@ ui <- navbarPage(
                                  "Choisissez votre segment:",
                                  choices = c("entreprises","professionnels","residentiels","pme.pmi"),
                                  multiple = TRUE,
-                                 selected = 'entreprises'),
+                                 selected = 'professionnels'),
                      selectInput("obs",
                                  "date de début:",
                                  choices = sort(unique(finale$jour)),
                                  selected = as.Date("2020-03-17",timeFormat="%Y-%m-%d")),
-                     selectInput("obs1",
-                                 "date finale:",
-                                 choices = sort(unique(finale$jour)),
-                                 selected = as.Date("2020-08-17",timeFormat="%Y-%m-%d"))
+                     # selectInput("obs1",
+                     #             "date finale:",
+                     #             choices = sort(unique(finale$jour)),
+                     #             selected = as.Date("2020-08-17",timeFormat="%Y-%m-%d"))
                      # sliderInput("obs1",
                      #             "date finale:",
                      #             min = as.Date("2020-03-17","%Y-%m-%d"),
                      #             max = as.Date("2020-11-20","%Y-%m-%d"),
                      #             value=as.Date("2020-04-21"),timeFormat="%Y-%m-%d"),
+
+                     uiOutput("secondSelection")
+                     
                      
                  ),
                  
                  
                  mainPanel(
-                     h3(textOutput('nom_segment')),
-                     
                      plotlyOutput('courbe_realise_mod'),
                      valueBoxOutput("sommered"),
                      valueBoxOutput("sommepred"),
                      valueBoxOutput("diff"),
                      valueBoxOutput("diffp"),
-                     tableOutput('ma_table2'),
                      
+                     tableOutput('ma_table2'),
                      downloadLink('downloadData', 'telecharger')
                      
                      
@@ -317,9 +318,10 @@ ui <- navbarPage(
 
 server <- function(input, output) {
     
-    output$nom_segment <- renderText({
-        input$segment
-    })
+    # output$nomtable <- renderText({
+    #     a="Table de données en Gwh"
+    #     a
+    # })
     
     
     filtre <- reactive({
@@ -415,7 +417,9 @@ server <- function(input, output) {
             aes(y  = value, x = jour, color = name)+
             geom_line()+
             theme_bw()+
-            theme(legend.position = 'bottom')
+            theme(legend.position = 'bottom')+
+            ggtitle("Graphique des consommations réalisée et prédites par segment") +
+            xlab("Date") + ylab("Consommation (Gwh)")
         
         
         ggplotly(fig)
@@ -432,22 +436,22 @@ server <- function(input, output) {
     
     
     output$sommered <- renderValueBox({
-        valueBox("Somme de la consommation reelle", get_somme()
-        )
+        valueBox("Somme de la consommation reelle", paste0(as.character(round(get_somme(),3))," Gwh"))
+        
     })
     output$sommepred <- renderValueBox({
         
-        valueBox("Somme de la consommation prédite", get_somme_pr()
+        valueBox("Somme de la consommation prédite", paste0(as.character(round(get_somme_pr(),3))," Gwh")
         )
     })
     
     output$diff <- renderValueBox({
-        valueBox("Somme de l'ecart entre prédiction et realisation", get_somme_di()
+        valueBox("Somme de l'ecart entre prédiction et realisation", paste0(as.character(round(get_somme_di(),3))," Gwh")
         )
     })
     
     output$diffp <- renderValueBox({
-        valueBox("Pourcentage de l'ecart", get_somme_di_p()
+        valueBox("Pourcentage de l'ecart", paste0(as.character(round(get_somme_di_p(),3))," %")
         )
     })
     
@@ -460,6 +464,16 @@ server <- function(input, output) {
             write.csv(filtre(), file)
         }
     )
+    
+    
+    output$secondSelection <- renderUI({ 
+        fin<-finale%>%filter(jour>input$obs)
+        selectInput("obs1",
+                    "date finale:", 
+                    choices = sort(unique(fin$jour)),
+                    selected = as.Date("2020-08-17",timeFormat="%Y-%m-%d"))
+        
+    })
     
 }
 
