@@ -248,27 +248,28 @@ finale2<-finale%>%mutate(conss_pme.pmi=puiss_pme.pmi*24/1000000000)%>%
 finale3<-finale2%>%select(-puiss_pme.pmi,-puiss_professionnels,-puiss_entreprises,-puiss_residentiels,-pred_puiss_pme.pmi,-pred_puiss_professionnels,-pred_puiss_residentiels,-pred_puiss_entreprises)
 finale4<-finale3%>%select(-ecart_pme.pmi,-ecart_professionnels,-ecart_entreprises,-ecart_residentiels)
 
-join3<-mutate(finale4,ecart_pme.pmi=abs(pred_conss_pme.pmi-conss_pme.pmi))
-join3<-mutate(join3,ecart_professionnels=abs(pred_conss_professionnels-conss_professionnels))
-join3<-mutate(join3,ecart_entreprises=abs(pred_conss_entreprises-conss_entreprises))
-join3<-mutate(join3,ecart_residentiels=abs(pred_conss_residentiels-conss_residentiels))
+join3<-mutate(finale4,ecart_pme.pmi=conss_pme.pmi-pred_conss_pme.pmi)
+join3<-mutate(join3,ecart_professionnels=conss_professionnels-pred_conss_professionnels)
+join3<-mutate(join3,ecart_entreprises=conss_entreprises-pred_conss_entreprises)
+join3<-mutate(join3,ecart_residentiels=conss_residentiels-pred_conss_residentiels)
 
 finale<-join3
 
 # ui ----------------------------------------------------------------------
 
-ui <- navbarPage(
-    'Impact du covid sur les consommations électriques',
+ui <- dashboardPage(
+    dashboardHeader(
+        title="Impact du covid"
+    ),
     
-    tabPanel('Etude des données Gwh',
-             id = 'departements',
+    dashboardSidebar(
+        
+        sidebarMenu(
+            menuItem("Etude des données Gwh", tabName = "departements")
+        ),
+
              
-             
-             
-             sidebarLayout(
-                 sidebarPanel(
-                     
-                     selectInput("segment",
+                 selectInput("segment",
                                  "Choisissez votre segment:",
                                  choices = c("entreprises","professionnels","residentiels","pme.pmi"),
                                  multiple = TRUE,
@@ -277,41 +278,34 @@ ui <- navbarPage(
                                  "date de début:",
                                  choices = sort(unique(finale$jour)),
                                  selected = as.Date("2020-03-17",timeFormat="%Y-%m-%d")),
-                     # selectInput("obs1",
-                     #             "date finale:",
-                     #             choices = sort(unique(finale$jour)),
-                     #             selected = as.Date("2020-08-17",timeFormat="%Y-%m-%d"))
-                     # sliderInput("obs1",
-                     #             "date finale:",
-                     #             min = as.Date("2020-03-17","%Y-%m-%d"),
-                     #             max = as.Date("2020-11-20","%Y-%m-%d"),
-                     #             value=as.Date("2020-04-21"),timeFormat="%Y-%m-%d"),
 
                      uiOutput("secondSelection")
                      
                      
-                 ),
+                ) ,
                  
+    dashboardBody(
+        
+        tabItem('departements',
+            plotlyOutput('courbe_realise_mod'),
+            valueBoxOutput("sommered"),
+            valueBoxOutput("sommepred"),
+            valueBoxOutput("diff"),
+            valueBoxOutput("diffp"),
+            
+            tableOutput('ma_table2'),
+            downloadLink('downloadData', 'telecharger')
+            
+            
+        )
+    )
+                     
+                     
+                     
                  
-                 mainPanel(
-                     plotlyOutput('courbe_realise_mod'),
-                     valueBoxOutput("sommered"),
-                     valueBoxOutput("sommepred"),
-                     valueBoxOutput("diff"),
-                     valueBoxOutput("diffp"),
-                     
-                     tableOutput('ma_table2'),
-                     downloadLink('downloadData', 'telecharger')
-                     
-                     
-                     
-                 )
-             )
+             
              
     )
-)
-
-
 
 # Server ------------------------------------------------------------------
 
@@ -436,24 +430,25 @@ server <- function(input, output) {
     
     
     output$sommered <- renderValueBox({
-        valueBox("Somme de la consommation reelle", paste0(as.character(round(get_somme(),3))," Gwh"))
+        valueBox(paste0(as.character(round(get_somme(),1))," Gwh"),"Somme de la consommation reelle",color="blue")
         
     })
     output$sommepred <- renderValueBox({
         
-        valueBox("Somme de la consommation prédite", paste0(as.character(round(get_somme_pr(),3))," Gwh")
+        valueBox(paste0(as.character(round(get_somme_pr(),1))," Gwh"),"Somme de la consommation prédite",color="blue"
         )
     })
     
     output$diff <- renderValueBox({
-        valueBox("Somme de l'ecart entre prédiction et realisation", paste0(as.character(round(get_somme_di(),3))," Gwh")
+
+        
+        valueBox(paste0(as.character(round(get_somme_di(),1))," Gwh"), paste0("Ecart : impact de ",as.character(round(get_somme_di_p(),3)),"% sur la consommation"),color = "blue"
         )
+        
+    
+        
     })
     
-    output$diffp <- renderValueBox({
-        valueBox("Pourcentage de l'ecart", paste0(as.character(round(get_somme_di_p(),3))," %")
-        )
-    })
     
     
     output$downloadData <- downloadHandler(
