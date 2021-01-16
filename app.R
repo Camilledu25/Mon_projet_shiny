@@ -270,7 +270,7 @@ ui <- dashboardPage(
 
              
                  selectInput("segment",
-                                 "Choisissez votre segment:",
+                                 "Choisissez le/les segment(s):",
                                  choices = c("entreprises","professionnels","residentiels","pme.pmi"),
                                  multiple = TRUE,
                                  selected = 'professionnels'),
@@ -448,7 +448,7 @@ server <- function(input, output) {
     output$diff <- renderValueBox({
 
         
-        valueBox(paste0(as.character(round(get_somme_di(),1))," Gwh"), paste0("Ecart : impact de ",as.character(round(get_somme_di_p(),3)),"% sur la consommation"),color = "blue"
+        valueBox(paste0(as.character(round(get_somme_di(),1))," Gwh"), paste0("Ecart ( impact de ",as.character(round(get_somme_di_p(),3)),"% sur la consommation)"),color = "blue"
         )
         
     
