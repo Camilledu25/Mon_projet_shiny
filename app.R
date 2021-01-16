@@ -9,7 +9,7 @@ library(ggplot2)
 library(lubridate)
 library(caret)
 library(plotly)
-
+library(reactable)
 
 # Preparation des données -------------------------------------------------
 
@@ -292,8 +292,12 @@ ui <- dashboardPage(
             valueBoxOutput("sommepred"),
             valueBoxOutput("diff"),
             valueBoxOutput("diffp"),
-            
-            tableOutput('ma_table2'),
+            # box( title = "table de donnee",
+            #             tableOutput("ma_table2"),status = "primary",style = "height:500px; overflow-y: scroll;overflow-x: scroll;"
+            #      ),
+            # 
+            #tableOutput('ma_table2'),
+            dataTableOutput('ma_table2'),
             downloadLink('downloadData', 'telecharger')
             
             
@@ -420,12 +424,14 @@ server <- function(input, output) {
         
     })
     
-    output$ma_table2 <- renderTable({
+    output$ma_table2 <- renderDataTable({
         out <-  filtre()
         out$jour<-as.character(out$jour)
-        
-        print(out)
-        out
+         datatable(out, options = list(scrollX = TRUE))
+        # out<-reactable(out)
+        # print(out)
+        # out
+    
     } )
     
     
