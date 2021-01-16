@@ -1,4 +1,5 @@
-# libraries
+# Encoding : UTF-8
+
 library(shiny)
 library(dplyr)
 library(shinydashboard)
@@ -259,7 +260,8 @@ finale<-join3
 
 ui <- dashboardPage(
     dashboardHeader(
-        title="Impact du covid"
+        title="Impact du covid sur la consommation électrique",
+        titleWidth = 500
     ),
     
     dashboardSidebar(
@@ -298,7 +300,7 @@ ui <- dashboardPage(
             # 
             #tableOutput('ma_table2'),
             dataTableOutput('ma_table2'),
-            downloadLink('downloadData', 'telecharger la table')
+            downloadLink('downloadData', 'telecharger')
             
             
         )
@@ -416,7 +418,7 @@ server <- function(input, output) {
             geom_line()+
             theme_bw()+
             theme(legend.position = 'bottom')+
-            ggtitle("Graphique des consommations réalisée et prédites par segment") +
+            ggtitle("Graphique des consommations réalisées et prédites par segment") +
             xlab("Date") + ylab("Consommation (Gwh)")
         
         
