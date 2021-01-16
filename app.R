@@ -298,7 +298,7 @@ ui <- dashboardPage(
             # 
             #tableOutput('ma_table2'),
             dataTableOutput('ma_table2'),
-            downloadLink('downloadData', 'telecharger')
+            downloadLink('downloadData', 'telecharger la table')
             
             
         )
