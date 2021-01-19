@@ -29,7 +29,7 @@ bilan$categorie_client=as.factor(bilan$categorie_client)
 
 bilan<-bilan%>%filter(jour>=as.Date("2015-12-18"))
 
-bilanR<-bilan%>%filter(categorie_client=="Résidentiels")%>%select(-categorie_client)
+bilanR<-bilan%>%filter(categorie_client=="Résidentiels")%>%select(-categorie_client) # ! encodage
 colnames(bilanR) <- c("jour","puiss_residentiels")
 bilanP<-bilan%>%filter(categorie_client=="Professionnels")%>%select(-categorie_client)
 colnames(bilanP) <- c("jour","puiss_professionnels")
@@ -260,7 +260,7 @@ finale<-join3
 
 ui <- dashboardPage(
     dashboardHeader(
-        title="Impact du covid sur la consommation électrique",
+        title="Impact du covid sur la consommation electrique",
         titleWidth = 500
     ),
     
@@ -418,7 +418,7 @@ server <- function(input, output) {
             geom_line()+
             theme_bw()+
             theme(legend.position = 'bottom')+
-            ggtitle("Graphique des consommations réalisées et prédites par segment") +
+            ggtitle("Graphique des consommations realisees et predites par segment") +
             xlab("Date") + ylab("Consommation (Gwh)")
         
         
@@ -443,7 +443,7 @@ server <- function(input, output) {
     })
     output$sommepred <- renderValueBox({
         
-        valueBox(paste0(as.character(round(get_somme_pr(),1))," Gwh"),"Somme de la consommation prédite",color="blue"
+        valueBox(paste0(as.character(round(get_somme_pr(),1))," Gwh"),"Somme de la consommation predite",color="blue"
         )
     })
     
